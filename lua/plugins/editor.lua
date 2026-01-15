@@ -54,14 +54,19 @@ return {
           return ""
         end
 
-        -- Vue/JS: Tree-sitter tende a dare fold migliori.
-        if filetype == "vue"
-          or filetype == "javascript"
+        -- Vue: Tree-sitter tende a dare fold migliori.
+        if filetype == "vue" then
+          return { "treesitter", "indent" }
+        end
+
+        -- TypeScript/JavaScript: LazyVim di solito preferisce LSP folding.
+        -- Fallback a Tree-sitter quando il server non supporta folding.
+        if filetype == "javascript"
           or filetype == "javascriptreact"
           or filetype == "typescript"
           or filetype == "typescriptreact"
         then
-          return { "treesitter", "indent" }
+          return { "lsp", "treesitter" }
         end
 
         -- Default robusto: LSP come main, indent come fallback.

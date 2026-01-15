@@ -73,6 +73,12 @@ return {
       -- -----------------------------------------------------------------------
       local capabilities = vim.lsp.protocol.make_client_capabilities()
 
+      -- LazyVim-style: aiuta i server LSP a mandare folding ranges a ufo.
+      capabilities.textDocument.foldingRange = {
+        dynamicRegistration = false,
+        lineFoldingOnly = true,
+      }
+
       -- Se c'è nvim-cmp, aggiunge capabilities per completion/snippets.
       local has_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
       if has_cmp then
