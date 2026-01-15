@@ -33,7 +33,7 @@ return {
         "javascript",
         "jsdoc",
         "json",
-        "jsonc",
+        "prisma",
         "lua",
         "luap",
         "markdown",
@@ -63,6 +63,10 @@ return {
       if ok_ts then
         ts.setup({})
       end
+
+      -- jsonc: nel treesitter "nuovo" non esiste più un parser dedicato.
+      -- Registriamo json per il filetype jsonc.
+      pcall(vim.treesitter.language.register, "json", "jsonc")
 
       -- -----------------------------------------------------------------------
       -- 2) Install parser mancanti

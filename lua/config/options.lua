@@ -60,3 +60,13 @@ vim.opt.foldmethod = "expr"
 -- Conceal
 -- -----------------------------------------------------------------------------
 vim.opt.conceallevel = 0
+
+-- -----------------------------------------------------------------------------
+-- Filetype extra
+-- -----------------------------------------------------------------------------
+-- Alcune estensioni non sono sempre mappate dal core.
+vim.filetype.add({
+  extension = {
+    prisma = "prisma",
+  },
+})
