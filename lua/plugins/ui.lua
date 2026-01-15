@@ -1,20 +1,23 @@
 -- =============================================================================
 -- NewVim - plugins/ui.lua
 -- =============================================================================
--- UI “distro-like”:
---   - nvim-notify: notifiche moderne
+-- UI “distro-like” ma senza fronzoli:
+--   - nvim-notify: notifiche moderne (senza animazioni)
 --   - dressing: migliora vim.ui.select / vim.ui.input
---   - noice: cmdline/messaggi/popup più curati
+--   - noice: cmdline/messaggi più curati
+--
+-- Richieste utente:
+--   1) Niente animazioni
+--   2) Niente autocomplete/popupmenu mentre scrivi comandi
 -- =============================================================================
 
 return {
   -- ---------------------------------------------------------------------------
-  -- Notifiche
+  -- Notifiche (no animazioni)
   -- ---------------------------------------------------------------------------
   {
     "rcarriga/nvim-notify",
 
-    -- Mapping: pulisci tutte le notifiche
     keys = {
       {
         "<leader>un",
@@ -26,9 +29,11 @@ return {
     },
 
     opts = {
+      -- Disabilita completamente le animazioni di notify
+      stages = "static",
+
       timeout = 3000,
 
-      -- Evita che una notifica “gigante” copra tutto
       max_height = function()
         return math.floor(vim.o.lines * 0.75)
       end,
@@ -36,7 +41,6 @@ return {
         return math.floor(vim.o.columns * 0.75)
       end,
 
-      -- Z-index alto: sopra altri float
       on_open = function(win)
         vim.api.nvim_win_set_config(win, { zindex = 100 })
       end,
@@ -50,7 +54,6 @@ return {
     "stevearc/dressing.nvim",
     lazy = true,
 
-    -- Lazy-load “intelligente”: carica dressing solo al primo utilizzo.
     init = function()
       ---@diagnostic disable-next-line: duplicate-set-field
       vim.ui.select = function(...)
@@ -67,7 +70,7 @@ return {
   },
 
   -- ---------------------------------------------------------------------------
-  -- noice: cmdline/messaggi/popup
+  -- noice: cmdline/messaggi
   -- ---------------------------------------------------------------------------
   {
     "folke/noice.nvim",
@@ -79,8 +82,11 @@ return {
     },
 
     opts = {
+      -- 1) Disabilita popupmenu del cmdline (autocomplete mentre scrivi comandi)
+      popupmenu = { enabled = false },
+
+      -- 2) Mantieni cmdline/messaggi più leggibili
       lsp = {
-        -- Usa rendering markdown migliore per hover/signature help
         override = {
           ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
           ["vim.lsp.util.stylize_markdown"] = true,
@@ -88,7 +94,6 @@ return {
         },
       },
 
-      -- “Route” = regole per filtrare/redirectare messaggi
       routes = {
         {
           filter = {

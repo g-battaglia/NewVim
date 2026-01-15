@@ -6,9 +6,9 @@
 --   - terminal floating
 --   - utility varie (bufdelete, ecc.)
 --
--- Nota:
--- In LazyVim Snacks viene integrato con varie helper (pick/root). Qui usiamo
--- le API standard di Snacks.
+-- Allineamento “stile LazyVim”:
+-- - i picker del dashboard (files/grep/recent) usano la project root
+--   (LSP/.git fallback) tramite `require('util').get_root()`.
 -- =============================================================================
 
 return {
@@ -25,11 +25,36 @@ return {
         -- stylua: ignore
         ---@type snacks.dashboard.Item[]
         keys = {
-          { icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
+          -- Root-aware (come LazyVim)
+          {
+            icon = " ",
+            key = "f",
+            desc = "Find File (Root)",
+            action = ":lua Snacks.dashboard.pick('files', { cwd = require('util').get_root() })",
+          },
+          {
+            icon = " ",
+            key = "g",
+            desc = "Find Text (Root)",
+            action = ":lua Snacks.dashboard.pick('live_grep', { cwd = require('util').get_root() })",
+          },
+          {
+            icon = " ",
+            key = "r",
+            desc = "Recent Files (Root)",
+            action = ":lua Snacks.dashboard.pick('oldfiles', { cwd = require('util').get_root() })",
+          },
+
+          -- Non-root-aware per definizione
           { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
-          { icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
-          { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
-          { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
+          {
+            icon = " ",
+            key = "c",
+            desc = "Config",
+            action = ":lua Snacks.dashboard.pick('files', { cwd = vim.fn.stdpath('config') })",
+          },
+
+          -- Session / lifecycle
           { icon = " ", key = "s", desc = "Restore Session", section = "session" },
           { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
           { icon = " ", key = "q", desc = "Quit", action = ":qa" },
@@ -54,13 +79,8 @@ return {
     -- Stili
     -- -------------------------------------------------------------------------
     styles = {
-      terminal = {
-        height = 0.3,
-      },
-      lazygit = {
-        width = 0.9,
-        height = 0.9,
-      },
+      terminal = { height = 0.3 },
+      lazygit = { width = 0.9, height = 0.9 },
     },
 
     -- -------------------------------------------------------------------------
