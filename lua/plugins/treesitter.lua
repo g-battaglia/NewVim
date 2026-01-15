@@ -1,12 +1,15 @@
 -- =============================================================================
 -- NewVim - plugins/treesitter.lua
 -- =============================================================================
--- Treesitter:
---   - parsing accurato per highlight/fold/indent
---   - installazione automatica dei parser richiesti
+-- NOTE IMPORTANTE (Neovim 0.11 / nvim-treesitter “nuovo”):
 --
--- Nota: se vedi un warning "configs not found", di solito significa che il plugin
--- non è ancora stato installato completamente (o è stato reinstallato in quel momento).
+-- Il plugin nvim-treesitter ha cambiato struttura interna:
+--   - il modulo `nvim-treesitter.configs` NON esiste più
+--   - ora esistono `nvim-treesitter` + `nvim-treesitter.config`
+--
+-- Quindi in questa config facciamo due cose “semplici e robuste”:
+--   1) Installiamo i parser richiesti (se mancanti)
+--   2) Avviamo Tree-sitter nei buffer (highlight/foldexpr funzionano)
 -- =============================================================================
 
 return {
@@ -14,14 +17,15 @@ return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
 
-    -- Carica treesitter quando apri un file (riduce lavoro all'avvio)
+    -- Carica quando serve (apertura file)
     event = { "BufReadPost", "BufNewFile" },
 
-    -- Comandi utili
+    -- Comandi utili per manutenzione parser
     cmd = { "TSUpdate", "TSInstall" },
 
+    -- Lista parser “desiderati”.
+    -- NB: non è la vecchia `ensure_installed` di configs.lua; qui la gestiamo noi.
     opts = {
-      -- Parser da tenere installati
       ensure_installed = {
         "bash",
         "css",
@@ -48,26 +52,40 @@ return {
         "vue",
         "yaml",
       },
-
-      -- Highlight basato su AST (più robusto del regex)
-      highlight = { enable = true },
-
-      -- Indentazione basata su AST (non perfetta per tutti i linguaggi, ma spesso utile)
-      indent = { enable = true },
     },
 
     config = function(_, opts)
-      -- Lazy a volte esegue config durante install/reload.
-      -- Con pcall evitiamo hard-fail se il modulo non è ancora pronto.
-      local ok, configs = pcall(require, "nvim-treesitter.configs")
-      if not ok then
-        vim.notify(
-          "nvim-treesitter.configs not found. Plugin might be installing.",
-          vim.log.levels.WARN
-        )
-        return
+      -- -----------------------------------------------------------------------
+      -- 1) Setup base di nvim-treesitter (config interna: install_dir, ecc.)
+      -- -----------------------------------------------------------------------
+      -- In questa versione del plugin la “setup” gestisce config generica.
+      local ok_ts, ts = pcall(require, "nvim-treesitter")
+      if ok_ts then
+        ts.setup({})
       end
-      configs.setup(opts)
+
+      -- -----------------------------------------------------------------------
+      -- 2) Install parser mancanti
+      -- -----------------------------------------------------------------------
+      local ok_install, install = pcall(require, "nvim-treesitter.install")
+      if ok_install and opts.ensure_installed then
+        -- Non blocchiamo l'avvio: install è async.
+        install.install(opts.ensure_installed, { summary = false })
+      end
+
+      -- -----------------------------------------------------------------------
+      -- 3) Avvia Tree-sitter per i buffer
+      -- -----------------------------------------------------------------------
+      -- Questo rende effettivi:
+      --   - highlight tree-sitter
+      --   - foldexpr = vim.treesitter.foldexpr()
+      -- Se manca il parser per un buffer, pcall evita errori.
+      vim.api.nvim_create_autocmd({ "FileType" }, {
+        group = vim.api.nvim_create_augroup("newvim_treesitter_start", { clear = true }),
+        callback = function(ev)
+          pcall(vim.treesitter.start, ev.buf)
+        end,
+      })
     end,
   },
 }
