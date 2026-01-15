@@ -1,10 +1,21 @@
--- Manual LSP Server Configurations
--- This file returns a table of server configurations that will be applied
--- by the LSP plugin setup in lua/plugins/lsp.lua.
--- Keys match the server name in lspconfig/mason.
+-- =============================================================================
+-- NewVim - config/servers.lua
+-- =============================================================================
+-- Configurazioni “manuali” per server LSP specifici.
+--
+-- IMPORTANTE:
+-- Questo file NON deve chiamare `lspconfig.SERVER.setup(...)` direttamente.
+--
+-- Motivo:
+-- - La configurazione LSP centralizzata sta in `lua/plugins/lsp.lua`.
+-- - Qui restituiamo solo una tabella di opzioni, che verrà applicata dal
+--   setup handler (Mason-LSPConfig).
+-- =============================================================================
 
 return {
-  -- Intelephense (PHP)
+  -- ---------------------------------------------------------------------------
+  -- PHP: Intelephense
+  -- ---------------------------------------------------------------------------
   intelephense = {
     settings = {
       intelephense = {
@@ -12,29 +23,97 @@ return {
           braces = "k&r",
         },
         stubs = {
-          "Core", "FFI", "PDO", "Phar", "Reflection", "SPL", "SimpleXML",
-          "Zend OPcache", "apache", "bcmath", "bz2", "calendar", "com_dotnet",
-          "ctype", "curl", "date", "dba", "dom", "enchant", "exif", "fileinfo",
-          "filter", "fpm", "ftp", "gd", "gettext", "gmp", "hash", "iconv", "imap",
-          "intl", "json", "ldap", "libxml", "mbstring", "meta", "mysqli", "oci8",
-          "odbc", "openssl", "pcntl", "pcre", "pdo_ibm", "pdo_mysql", "pdo_pgsql",
-          "pdo_sqlite", "pgsql", "posix", "pspell", "readline", "random", "session",
-          "shmop", "snmp", "soap", "sockets", "sodium", "sqlite3", "standard",
-          "superglobals", "sysvmsg", "sysvsem", "sysvshm", "tidy", "tokenizer",
-          "wordpress", "wordpress-stubs", "woocommerce-stubs", "acf-pro-stubs",
-          "wordpress-globals", "wp-cli-stubs", "xml", "xmlreader", "xmlrpc",
-          "xmlwriter", "xsl", "zip", "zlib",
+          "Core",
+          "FFI",
+          "PDO",
+          "Phar",
+          "Reflection",
+          "SPL",
+          "SimpleXML",
+          "Zend OPcache",
+          "apache",
+          "bcmath",
+          "bz2",
+          "calendar",
+          "com_dotnet",
+          "ctype",
+          "curl",
+          "date",
+          "dba",
+          "dom",
+          "enchant",
+          "exif",
+          "fileinfo",
+          "filter",
+          "fpm",
+          "ftp",
+          "gd",
+          "gettext",
+          "gmp",
+          "hash",
+          "iconv",
+          "imap",
+          "intl",
+          "json",
+          "ldap",
+          "libxml",
+          "mbstring",
+          "meta",
+          "mysqli",
+          "oci8",
+          "odbc",
+          "openssl",
+          "pcntl",
+          "pcre",
+          "pdo_ibm",
+          "pdo_mysql",
+          "pdo_pgsql",
+          "pdo_sqlite",
+          "pgsql",
+          "posix",
+          "pspell",
+          "readline",
+          "random",
+          "session",
+          "shmop",
+          "snmp",
+          "soap",
+          "sockets",
+          "sodium",
+          "sqlite3",
+          "standard",
+          "superglobals",
+          "sysvmsg",
+          "sysvsem",
+          "sysvshm",
+          "tidy",
+          "tokenizer",
+          "wordpress",
+          "wordpress-stubs",
+          "woocommerce-stubs",
+          "acf-pro-stubs",
+          "wordpress-globals",
+          "wp-cli-stubs",
+          "xml",
+          "xmlreader",
+          "xmlrpc",
+          "xmlwriter",
+          "xsl",
+          "zip",
+          "zlib",
         },
       },
     },
   },
 
-  -- Python LSP (pylsp)
+  -- ---------------------------------------------------------------------------
+  -- Python: pylsp
+  -- ---------------------------------------------------------------------------
   pylsp = {
     settings = {
       pylsp = {
         plugins = {
-          -- Disabled linters/formatters (using other tools or preferences)
+          -- Disabilitati
           autopep8 = { enabled = false },
           flake8 = { enabled = false },
           isort = { enabled = false },
@@ -43,8 +122,8 @@ return {
           pyflakes = { enabled = false },
           pylint = { enabled = false },
           yapf = { enabled = false },
-          
-          -- Enabled linters/formatters
+
+          -- Abilitati
           pyright = { enabled = true },
           black = { enabled = true },
           pylsp_mypy = { enabled = true },
@@ -53,7 +132,9 @@ return {
     },
   },
 
+  -- ---------------------------------------------------------------------------
   -- CSS / SCSS / LESS
+  -- ---------------------------------------------------------------------------
   cssls = {
     settings = {
       css = { validate = true, lint = { unknownAtRules = "ignore" } },
@@ -62,7 +143,9 @@ return {
     },
   },
 
-  -- Vue 3 (Volar)
+  -- ---------------------------------------------------------------------------
+  -- Vue: Volar
+  -- ---------------------------------------------------------------------------
   volar = {
     init_options = {
       vue = {
@@ -82,13 +165,16 @@ return {
     },
   },
 
-  -- TypeScript / JavaScript (ts_ls)
+  -- ---------------------------------------------------------------------------
+  -- TypeScript: ts_ls (con plugin Vue TS)
+  -- ---------------------------------------------------------------------------
   ts_ls = {
     init_options = {
       plugins = {
         {
           name = "@vue/typescript-plugin",
-          location = vim.fn.stdpath("data") .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
+          location = vim.fn.stdpath("data")
+            .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
           languages = { "vue" },
         },
       },

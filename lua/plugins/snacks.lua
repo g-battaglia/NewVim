@@ -1,11 +1,27 @@
+-- =============================================================================
+-- NewVim - plugins/snacks.lua
+-- =============================================================================
+-- snacks.nvim:
+--   - dashboard
+--   - terminal floating
+--   - utility varie (bufdelete, ecc.)
+--
+-- Nota:
+-- In LazyVim Snacks viene integrato con varie helper (pick/root). Qui usiamo
+-- le API standard di Snacks.
+-- =============================================================================
+
 return {
   "folke/snacks.nvim",
   priority = 1000,
   lazy = false,
+
   opts = {
+    -- -------------------------------------------------------------------------
+    -- Dashboard
+    -- -------------------------------------------------------------------------
     dashboard = {
       preset = {
-        -- Removed LazyVim.pick dependency
         -- stylua: ignore
         ---@type snacks.dashboard.Item[]
         keys = {
@@ -20,34 +36,38 @@ return {
         },
       },
     },
+
+    -- -------------------------------------------------------------------------
+    -- Indent guides (Snacks)
+    -- -------------------------------------------------------------------------
     indent = {
       priority = 1,
-      enabled = true, -- enable indent guides
+      enabled = true,
       char = "│",
-      only_scope = false, -- only show indent guides of the scope
-      only_current = false, -- only show indent guides in the current window
-      hl = "SnacksIndent", ---@type string|string[] hl groups for indent guides
-      animate = {
-        enabled = false,
-      },
+      only_scope = false,
+      only_current = false,
+      hl = "SnacksIndent",
+      animate = { enabled = false },
     },
+
+    -- -------------------------------------------------------------------------
+    -- Stili
+    -- -------------------------------------------------------------------------
     styles = {
       terminal = {
-        height = 0.3, -- Set the terminal height as a fraction of the window
+        height = 0.3,
       },
       lazygit = {
-        width = 0.9, -- Width of the lazygit window
-        height = 0.9, -- Height of the lazygit window
+        width = 0.9,
+        height = 0.9,
       },
     },
-    scroll = {
-      enabled = false,
-    },
-    scope = {
-      enabled = false,
-    },
-    animate = {
-      enabled = false,
-    },
+
+    -- -------------------------------------------------------------------------
+    -- Feature non usate (tenute spente)
+    -- -------------------------------------------------------------------------
+    scroll = { enabled = false },
+    scope = { enabled = false },
+    animate = { enabled = false },
   },
 }

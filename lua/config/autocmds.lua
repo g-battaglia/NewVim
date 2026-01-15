@@ -1,29 +1,39 @@
-local Util = require("util")
+-- =============================================================================
+-- NewVim - config/autocmds.lua
+-- =============================================================================
+-- Autocomandi “quality of life”.
+-- L'idea è replicare i comportamenti comodi tipici di LazyVim, ma in modo esplicito.
+-- =============================================================================
 
--- Check if we need to reload the file when it changed
--- This handles cases where a file is modified outside of Neovim
+-- -----------------------------------------------------------------------------
+-- 1) checktime: ricarica file modificati fuori da Neovim
+-- -----------------------------------------------------------------------------
+-- Scenario tipico: git checkout, formatter esterni, editor diversi.
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
-  group = vim.api.nvim_create_augroup("checktime", { clear = true }),
+  group = vim.api.nvim_create_augroup("newvim_checktime", { clear = true }),
   callback = function()
+    -- Evita buffer speciali (nofile) per non spam.
     if vim.o.buftype ~= "nofile" then
       vim.cmd("checktime")
     end
   end,
 })
 
--- Highlight on yank
--- Briefly highlights the copied text to give visual feedback
+-- -----------------------------------------------------------------------------
+-- 2) highlight_yank: feedback visivo dopo yank
+-- -----------------------------------------------------------------------------
 vim.api.nvim_create_autocmd("TextYankPost", {
-  group = vim.api.nvim_create_augroup("highlight_yank", { clear = true }),
+  group = vim.api.nvim_create_augroup("newvim_highlight_yank", { clear = true }),
   callback = function()
     vim.highlight.on_yank()
   end,
 })
 
--- Resize splits if window got resized
--- Keeps split proportions equal when the terminal window size changes
-vim.api.nvim_create_autocmd({ "VimResized" }, {
-  group = vim.api.nvim_create_augroup("resize_splits", { clear = true }),
+-- -----------------------------------------------------------------------------
+-- 3) resize_splits: ridistribuisci split dopo resize della finestra
+-- -----------------------------------------------------------------------------
+vim.api.nvim_create_autocmd("VimResized", {
+  group = vim.api.nvim_create_augroup("newvim_resize_splits", { clear = true }),
   callback = function()
     local current_tab = vim.fn.tabpagenr()
     vim.cmd("tabdo wincmd =")
@@ -31,10 +41,11 @@ vim.api.nvim_create_autocmd({ "VimResized" }, {
   end,
 })
 
--- Close some filetypes with <q>
--- Makes it easier to close temporary windows like help, man pages, and test outputs
+-- -----------------------------------------------------------------------------
+-- 4) close_with_q: chiudi buffer “utility” premendo `q`
+-- -----------------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
-  group = vim.api.nvim_create_augroup("close_with_q", { clear = true }),
+  group = vim.api.nvim_create_augroup("newvim_close_with_q", { clear = true }),
   pattern = {
     "PlenaryTestPopup",
     "help",
@@ -56,10 +67,11 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Wrap and check for spell in text filetypes
--- Automatically enables word wrap and spell check for writing (markdown, git commits)
+-- -----------------------------------------------------------------------------
+-- 5) wrap_spell: scrittura comoda su markdown/gitcommit
+-- -----------------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
-  group = vim.api.nvim_create_augroup("wrap_spell", { clear = true }),
+  group = vim.api.nvim_create_augroup("newvim_wrap_spell", { clear = true }),
   pattern = { "gitcommit", "markdown" },
   callback = function()
     vim.opt_local.wrap = true
@@ -67,24 +79,28 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Fix conceallevel for json files
--- Ensures JSON quotes are visible (conceal 0) for better editing experience
-vim.api.nvim_create_autocmd({ "FileType" }, {
-  group = vim.api.nvim_create_augroup("json_conceal", { clear = true }),
+-- -----------------------------------------------------------------------------
+-- 6) json_conceal: JSON senza conceal
+-- -----------------------------------------------------------------------------
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("newvim_json_conceal", { clear = true }),
   pattern = { "json", "jsonc", "json5" },
   callback = function()
     vim.opt_local.conceallevel = 0
   end,
 })
 
--- Auto create dir when saving a file
--- If you save to a path like `foo/bar/baz.lua` and `foo/bar` doesn't exist, this creates it
-vim.api.nvim_create_autocmd({ "BufWritePre" }, {
-  group = vim.api.nvim_create_augroup("auto_create_dir", { clear = true }),
+-- -----------------------------------------------------------------------------
+-- 7) auto_create_dir: crea cartelle mancanti al salvataggio
+-- -----------------------------------------------------------------------------
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = vim.api.nvim_create_augroup("newvim_auto_create_dir", { clear = true }),
   callback = function(event)
+    -- Skip per URI tipo scp://...
     if event.match:match("^%w%w+://") then
       return
     end
+
     local file = vim.loop.fs_realpath(event.match) or event.match
     vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,

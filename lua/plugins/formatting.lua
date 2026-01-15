@@ -1,31 +1,41 @@
+-- =============================================================================
+-- NewVim - plugins/formatting.lua
+-- =============================================================================
+-- Conform:
+--   - formattazione uniforme, per-filetype
+--   - alternativa leggera a null-ls
+--
+-- Scelte principali:
+--   - Prettier: preferiamo prettierd se disponibile (daemon)
+--   - Python  : isort -> black
+--   - Lua     : stylua
+-- =============================================================================
+
 return {
   {
     "stevearc/conform.nvim",
-    -- Load the plugin just before writing a file to ensure formatting works on save
+
+    -- Carica prima del salvataggio (per format-on-save se lo abiliti)
     event = { "BufWritePre" },
-    -- Command to show info about the current buffer's formatters
     cmd = { "ConformInfo" },
-    
+
     keys = {
       {
-        -- Custom keymap to format injected languages (e.g. SQL inside Python strings)
+        -- Formatta “linguaggi embedded” (es. JS dentro template, SQL dentro stringhe)
         "<leader>cF",
         function()
           require("conform").format({ formatters = { "injected" }, timeout_ms = 3000 })
         end,
         mode = { "n", "v" },
-        desc = "Format Injected Langs",
+        desc = "Format Injected",
       },
     },
-    
+
     opts = {
-      -- Define which formatters to use for each filetype
-      -- "prettierd" is preferred over "prettier" for performance (daemonized)
       formatters_by_ft = {
-        lua = { "stylua" }, -- Standard Lua formatter
-        python = { "isort", "black" }, -- Sort imports first (isort), then format code (black)
-        
-        -- Web technologies usually share the same prettier config
+        lua = { "stylua" },
+        python = { "isort", "black" },
+
         javascript = { { "prettierd", "prettier" } },
         typescript = { { "prettierd", "prettier" } },
         javascriptreact = { { "prettierd", "prettier" } },
@@ -41,12 +51,9 @@ return {
         markdown = { { "prettierd", "prettier" } },
         graphql = { { "prettierd", "prettier" } },
       },
-      
-      -- Default formatting options
+
+      -- Se non esiste formatter dedicato, prova quello del LSP.
       default_format_opts = {
-        -- "fallback": If no formatter is defined for the filetype (in formatters_by_ft),
-        -- use the LSP's formatting capability (e.g. clangd for C++).
-        -- This ensures we always have *some* formatting if a server is attached.
         lsp_format = "fallback",
       },
     },
