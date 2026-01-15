@@ -1,47 +1,76 @@
 -- =============================================================================
 -- NewVim - config/logging.lua
 -- =============================================================================
--- Logging “globale” su file (esteso) per debug.
+-- FILE LOG “GLOBALE” PER NEOVIM
+-- =============================================================================
+-- Questo modulo crea un file di log unico (rotato) dove finiscono:
+--   - messaggi UI (notify/echo/out/err)
+--   - comandi inseriti nella cmdline (":", "/", "?")
+--   - eventi LSP attach/detach
+--   - comandi esterni lanciati da Neovim (vim.system / vim.fn.system / jobstart)
+--   - (opzionale) comandi Ex eseguiti via API (nvim_command/nvim_cmd)
+--   - (opzionale) tasti premuti (vim.on_key) -> MOLTO verboso
 --
--- Questa versione è configurabile tramite `lua/config/constants.lua`.
+-- In pratica: se “sparisce” un errore perché Noice lo filtra o un plugin fa
+-- `nvim_echo`, qui lo ritrovi.
 --
--- TL;DR
--- -----
--- - Config: `require('config.constants').logging`
--- - Path:   `:NewVimLogPath` / `:NewVimLogOpen`
--- - Toggle: `:NewVimLogDisable` / `:NewVimLogEnable`
+-- -----------------------------------------------------------------------------
+-- COME SI CONFIGURA
+-- -----------------------------------------------------------------------------
+-- La configurazione non sta qui, ma in:
+--   `lua/config/constants.lua`  ->  `M.logging`
 --
--- Filosofia
--- ---------
--- Neovim non espone un singolo hook ufficiale per catturare “ogni cosa”.
--- Questa implementazione è molto completa e cattura:
---   - canali UI (notify/echo/out/err)
---   - comandi e ricerche da cmdline
---   - :messages in uscita
---   - LSP attach/detach
---   - (opzionale) tasti premuti (vim.on_key)
---   - (opzionale) comandi Ex lanciati da plugin (nvim_command/nvim_cmd)
---   - comandi esterni (vim.system, vim.fn.system, jobstart)
+-- Questo file legge quelle costanti e abilita/disabilita i singoli hook.
 --
--- IMPORTANT: loggare “tutto” può diventare rumoroso e può includere informazioni
--- sensibili (comandi shell/path). Usa i flag per modulare.
+-- -----------------------------------------------------------------------------
+-- DOVE SCRIVE
+-- -----------------------------------------------------------------------------
+-- Path:
+--   vim.fn.stdpath('state') .. '/newvim/nvim.log'
+--
+-- Comandi utili:
+--   :NewVimLogPath   -> mostra il path
+--   :NewVimLogOpen   -> apre il file
+--   :NewVimLogClear  -> svuota
+--   :NewVimLogEnable / :NewVimLogDisable -> attiva/disattiva al volo
+--
+-- -----------------------------------------------------------------------------
+-- NOTA SULLA “COMPLETEZZA”
+-- -----------------------------------------------------------------------------
+-- Non esiste un hook ufficiale per catturare “qualsiasi cosa” al 100%.
+-- Qui catturiamo moltissimo, ma non tutto:
+--   - output di terminali embedded, plugin custom, RPC esterni potrebbero avere
+--     canali propri.
+--
+-- -----------------------------------------------------------------------------
+-- PRIVACY
+-- -----------------------------------------------------------------------------
+-- Se abiliti i wrapper di `vim.system` / `vim.fn.system` / `jobstart`, nel log
+-- possono finire comandi shell completi e parte di stdout/stderr.
+-- Evita di condividere il log se contiene dati sensibili.
 -- =============================================================================
 
 local M = {}
 
 -- -----------------------------------------------------------------------------
--- Config: viene da config/constants.lua
+-- DEFAULTS + CONFIG LOADER
+-- -----------------------------------------------------------------------------
+-- `defaults` serve solo se il file constants manca o è incompleto.
+-- L'utente normalmente controlla tutto da `config/constants.lua`.
 -- -----------------------------------------------------------------------------
 
 local defaults = {
   enabled = true,
 
+  -- Rotazione file
   max_bytes = 2 * 1024 * 1024,
   max_files = 3,
 
+  -- Troncamento output (per non avere MB di log da comandi esterni)
   max_output_lines = 200,
   max_output_chars = 20000,
 
+  -- Canali UI
   hook_notify = true,
   hook_notify_once = true,
   hook_echo = true,
@@ -49,32 +78,42 @@ local defaults = {
   hook_err_write = true,
   hook_err_writeln = true,
 
+  -- Cmdline + :messages
   capture_cmdline = true,
   dump_messages_on_exit = true,
+
+  -- LSP
   log_lsp_events = true,
 
+  -- Comandi esterni
   hook_vim_system = true,
   hook_vim_fn_system = true,
   hook_jobstart = true,
 
+  -- Ex commands (molto verboso)
   hook_nvim_command = true,
   hook_nvim_cmd = true,
 
+  -- Keystrokes (estremamente verboso)
   hook_on_key = false,
 }
 
 ---@return table
 local function load_config(overrides)
+  -- Carichiamo le costanti centralizzate.
   local ok, constants = pcall(require, "config.constants")
   local from_constants = ok and constants.logging or {}
+
+  -- Ordine di precedenza:
+  --   defaults < constants.lua < overrides passati a setup()
   return vim.tbl_deep_extend("force", defaults, from_constants, overrides or {})
 end
 
--- cfg corrente (impostata in setup)
+-- cfg corrente (aggiornata in setup)
 M.cfg = load_config()
 
 -- -----------------------------------------------------------------------------
--- Paths
+-- PATHS
 -- -----------------------------------------------------------------------------
 
 local function log_dir()
@@ -93,7 +132,7 @@ local function ensure_dir(path)
 end
 
 -- -----------------------------------------------------------------------------
--- Helpers
+-- HELPERS GENERALI
 -- -----------------------------------------------------------------------------
 
 local function ts()
@@ -101,6 +140,7 @@ local function ts()
 end
 
 local function normalize_message(msg)
+  -- Normalizza valori non-stringa (es. tabelle) per metterli nel log.
   if msg == nil then
     return "<nil>"
   end
@@ -119,6 +159,7 @@ local function safe_open(path, mode)
   return f
 end
 
+-- Troncamenti (usati per stdout/stderr dei comandi esterni)
 local function truncate_text(text)
   text = text or ""
   if #text > M.cfg.max_output_chars then
@@ -131,6 +172,8 @@ local function truncate_lines(text)
   text = text or ""
   local out = {}
   local i = 0
+
+  -- Itera per linee in modo semplice (senza dipendenze)
   for line in text:gmatch("[^\n]*\n?") do
     if line == "" then
       break
@@ -142,11 +185,12 @@ local function truncate_lines(text)
     end
     table.insert(out, line)
   end
+
   return table.concat(out, "")
 end
 
 -- -----------------------------------------------------------------------------
--- Rotation
+-- ROTATION
 -- -----------------------------------------------------------------------------
 
 local function rotate_if_needed()
@@ -159,6 +203,8 @@ local function rotate_if_needed()
     return
   end
 
+  -- Sposta i file esistenti:
+  --   nvim.log.(max_files-1) <- ... <- nvim.log.1 <- nvim.log
   for i = M.cfg.max_files - 1, 1, -1 do
     local src = log_file() .. "." .. tostring(i)
     local dst = log_file() .. "." .. tostring(i + 1)
@@ -173,7 +219,9 @@ local function rotate_if_needed()
 end
 
 -- -----------------------------------------------------------------------------
--- Low-level writer
+-- SCRITTURA SU FILE
+-- -----------------------------------------------------------------------------
+-- write() è la primitive che tutte le sezioni chiamano.
 -- -----------------------------------------------------------------------------
 
 local function append_line(line)
@@ -199,7 +247,9 @@ local function write(kind, msg)
 end
 
 -- -----------------------------------------------------------------------------
--- Storage originali (per detach)
+-- STORAGE: implementazioni originali
+-- -----------------------------------------------------------------------------
+-- Ogni wrapper salva la funzione originale qui, per poter fare detach.
 -- -----------------------------------------------------------------------------
 
 M._notify_impl = nil
@@ -220,7 +270,9 @@ M._nvim_cmd_impl = nil
 M._on_key_ns = nil
 
 -- -----------------------------------------------------------------------------
--- Wrappers: notify/echo/out/err
+-- WRAPPERS: notify / echo / out_write / err_write
+-- -----------------------------------------------------------------------------
+-- Questi sono i canali “UI-ish” più comuni.
 -- -----------------------------------------------------------------------------
 
 function M.notify(msg, level, opts)
@@ -238,6 +290,7 @@ function M.notify_once(msg, level, opts)
 end
 
 function M.echo(chunks, history, opts)
+  -- chunks = { {text, hl?}, ... }
   local parts = {}
   if type(chunks) == "table" then
     for _, c in ipairs(chunks) do
@@ -282,7 +335,13 @@ function M.err_writeln(text)
 end
 
 -- -----------------------------------------------------------------------------
--- Wrappers: comandi esterni (vim.system / vim.fn.system / jobstart)
+-- WRAPPERS: comandi esterni
+-- -----------------------------------------------------------------------------
+-- Qui logghiamo esecuzioni di comandi esterni lanciati tramite API.
+--
+-- - vim.system(...) è l'API moderna (async) di Neovim.
+-- - vim.fn.system(...) è legacy (sincrona) ma molti plugin la usano.
+-- - vim.fn.jobstart(...) è per job async più vecchi.
 -- -----------------------------------------------------------------------------
 
 local function cmd_to_string(cmd)
@@ -314,6 +373,7 @@ function M.vim_system(cmd, opts, on_exit)
   end
 
   if M._vim_system_impl then
+    -- Se l'utente ha passato on_exit, lo wrappiamo per loggare anche il risultato.
     return M._vim_system_impl(cmd, opts, on_exit and wrapped_on_exit or nil)
   end
 end
@@ -346,7 +406,12 @@ function M.fn_jobstart(cmd, opts)
 end
 
 -- -----------------------------------------------------------------------------
--- Wrappers: Ex commands lanciati via API
+-- WRAPPERS: comandi Ex via API
+-- -----------------------------------------------------------------------------
+-- Questi hook sono i più "completi" per capire cosa fanno i plugin:
+-- molti plugin eseguono comandi via `vim.api.nvim_command` o `vim.api.nvim_cmd`.
+--
+-- ATTENZIONE: è normale che sia rumoroso.
 -- -----------------------------------------------------------------------------
 
 function M.nvim_command(cmd)
@@ -355,13 +420,16 @@ function M.nvim_command(cmd)
 end
 
 function M.nvim_cmd(cmd, opts)
-  -- cmd è una tabella (es. { cmd = 'edit', args = { 'file' } })
   write("ex", "nvim_cmd: " .. truncate_text(normalize_message(cmd)))
   return M._nvim_cmd_impl(cmd, opts)
 end
 
 -- -----------------------------------------------------------------------------
--- Extra: LSP events
+-- LSP EVENTS
+-- -----------------------------------------------------------------------------
+-- Logga attach/detach per capire:
+--   - quale client si attacca
+--   - su quale buffer/filetype
 -- -----------------------------------------------------------------------------
 
 local function setup_lsp_events()
@@ -372,7 +440,16 @@ local function setup_lsp_events()
       if not client then
         return
       end
-      write("lsp", string.format("attach client=%s(%s) buf=%s ft=%s", client.name, client.id, ev.buf, vim.bo[ev.buf].filetype))
+      write(
+        "lsp",
+        string.format(
+          "attach client=%s(%s) buf=%s ft=%s",
+          client.name,
+          client.id,
+          ev.buf,
+          vim.bo[ev.buf].filetype
+        )
+      )
     end,
   })
 
@@ -389,7 +466,10 @@ local function setup_lsp_events()
 end
 
 -- -----------------------------------------------------------------------------
--- Extra: on_key (super verboso)
+-- on_key (super verboso)
+-- -----------------------------------------------------------------------------
+-- Se attivo, logga (quasi) ogni tasto.
+-- Default OFF perché può far crescere il file molto velocemente.
 -- -----------------------------------------------------------------------------
 
 local function setup_on_key()
@@ -403,18 +483,26 @@ local function setup_on_key()
     if not M.cfg.enabled then
       return
     end
+
     local mode = vim.api.nvim_get_mode().mode
-    -- Log solo tasti “interessanti” (evita di esplodere troppo):
-    -- se vuoi davvero tutto, togli questo filtro.
+
+    -- Filtro minimo per non loggare ogni singolo carattere alfanumerico.
+    -- Se vuoi davvero tutto, puoi rimuoverlo.
     if #key == 1 and key:match("%w") then
       return
     end
+
     write("key", string.format("mode=%s key=%s", mode, vim.fn.keytrans(key)))
   end, M._on_key_ns)
 end
 
 -- -----------------------------------------------------------------------------
 -- Cmdline capture
+-- -----------------------------------------------------------------------------
+-- Logga:
+--   :comando
+--   /search
+--   ?search
 -- -----------------------------------------------------------------------------
 
 local function setup_cmdline_capture()
@@ -471,6 +559,12 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Attach / Detach
+-- -----------------------------------------------------------------------------
+-- attach() fa due cose:
+--   1) salva la funzione originale (es. vim.notify)
+--   2) rimpiazza la funzione con il wrapper che logga e poi delega
+--
+-- detach() ripristina le originali.
 -- -----------------------------------------------------------------------------
 
 function M.attach()
@@ -587,7 +681,6 @@ function M.detach()
     vim.api.nvim_cmd = M._nvim_cmd_impl
   end
 
-  -- disabilita callback on_key
   if M._on_key_ns then
     vim.on_key(nil, M._on_key_ns)
     M._on_key_ns = nil
@@ -597,30 +690,34 @@ end
 -- -----------------------------------------------------------------------------
 -- Public setup
 -- -----------------------------------------------------------------------------
+-- setup() viene chiamato da init.lua.
+-- Fa:
+--   - carica cfg
+--   - attach hook
+--   - registra autocmd e comandi
+--   - re-attach su VeryLazy (alcuni plugin riassegnano notify)
+-- -----------------------------------------------------------------------------
 
 function M.setup(opts)
-  -- Ricalcola config e applica.
   M.cfg = load_config(opts)
 
   vim.g.newvim_log_file = log_file()
 
-  -- attach subito (copre log early)
+  -- Aggancia subito per catturare anche bootstrap.
   M.attach()
 
-  -- info iniziali
+  -- Riga iniziale utile quando apri il log.
   write_startup_info()
 
-  -- cmdline capture
   if M.cfg.capture_cmdline then
     setup_cmdline_capture()
   end
 
-  -- LSP events
   if M.cfg.log_lsp_events then
     setup_lsp_events()
   end
 
-  -- re-attach dopo VeryLazy (plugin UI possono riassegnare notify/echo)
+  -- Re-attach dopo VeryLazy: Noice/Notify possono sostituire vim.notify.
   vim.api.nvim_create_autocmd("User", {
     group = vim.api.nvim_create_augroup("newvim_logging_attach", { clear = true }),
     pattern = "VeryLazy",
@@ -629,7 +726,6 @@ function M.setup(opts)
     end,
   })
 
-  -- dump messages in uscita
   if M.cfg.dump_messages_on_exit then
     vim.api.nvim_create_autocmd("VimLeavePre", {
       group = vim.api.nvim_create_augroup("newvim_logging_vimleave", { clear = true }),
@@ -639,7 +735,7 @@ function M.setup(opts)
     })
   end
 
-  -- comandi utility
+  -- Comandi utility (non loggano nulla da soli, servono solo a gestire il file)
   vim.api.nvim_create_user_command("NewVimLogPath", function()
     vim.notify(vim.g.newvim_log_file)
   end, { desc = "Show NewVim log file path" })
