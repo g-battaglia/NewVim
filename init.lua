@@ -12,6 +12,22 @@
 --   5) autocmds  -> automazioni/eventi
 -- =============================================================================
 
+-- 0) Cache Lua: se Neovim cambia versione, invalida il bytecode cache.
+-- Evita errori tipo: `module 'vim.lsp.client' not found` dopo upgrade.
+do
+  local cache_dir = vim.fn.stdpath("cache")
+  local version_file = cache_dir .. "/nvim-version"
+  local current = string.format("%d.%d.%d", vim.version().major, vim.version().minor, vim.version().patch)
+
+  local ok_read, prev_lines = pcall(vim.fn.readfile, version_file)
+  local prev = ok_read and prev_lines and prev_lines[1] or nil
+
+  if prev ~= current then
+    pcall(vim.fn.delete, cache_dir .. "/luac", "rf")
+    pcall(vim.fn.writefile, { current }, version_file)
+  end
+end
+
 -- 1) Opzioni: prima di tutto, per evitare flicker e comportamenti strani.
 require("config.options")
 

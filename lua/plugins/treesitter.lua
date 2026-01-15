@@ -71,10 +71,21 @@ return {
       -- -----------------------------------------------------------------------
       -- 2) Install parser mancanti
       -- -----------------------------------------------------------------------
-      local ok_install, install = pcall(require, "nvim-treesitter.install")
-      if ok_install and opts.ensure_installed then
-        -- Non blocchiamo l'avvio: install è async.
-        install.install(opts.ensure_installed, { summary = false })
+      -- Nota: le versioni recenti di nvim-treesitter compilano via `tree-sitter` CLI.
+      -- Se manca, i parser non verranno installati (e folding/highlight TS non funzionano).
+      if vim.fn.executable("tree-sitter") ~= 1 then
+        vim.schedule(function()
+          vim.notify(
+            "nvim-treesitter: manca `tree-sitter` CLI. Installa con `brew install tree-sitter` e poi esegui :TSUpdate / :TSInstall.",
+            vim.log.levels.WARN
+          )
+        end)
+      else
+        local ok_install, install = pcall(require, "nvim-treesitter.install")
+        if ok_install and opts.ensure_installed then
+          -- Non blocchiamo l'avvio: install è async.
+          install.install(opts.ensure_installed, { summary = false })
+        end
       end
 
       -- -----------------------------------------------------------------------
