@@ -98,3 +98,27 @@ vim.g.maplocalleader = "\\"
 -- LazyVim spesso imposta conceallevel a 3 di default. Tu lo disabiliti poi in
 -- options.lua (conceallevel=0). Qui lasciamo un default sensato.
 opt.conceallevel = 3
+
+-- -----------------------------------------------------------------------------
+-- Diagnostic signs (niente "E/W/I/H")
+-- -----------------------------------------------------------------------------
+-- Neovim 0.11: `sign_define()` è deprecato per i diagnostic signs.
+-- Usiamo `vim.diagnostic.config()` per impostare i simboli.
+do
+  local ok, icons = pcall(function()
+    return require("util").icons.diagnostics
+  end)
+
+  if ok and icons then
+    vim.diagnostic.config({
+      signs = {
+        text = {
+          [vim.diagnostic.severity.ERROR] = icons.Error,
+          [vim.diagnostic.severity.WARN] = icons.Warn,
+          [vim.diagnostic.severity.INFO] = icons.Info,
+          [vim.diagnostic.severity.HINT] = icons.Hint,
+        },
+      },
+    })
+  end
+end

@@ -52,9 +52,12 @@ vim.g.root_spec = { "lsp", { "package.json", ".git", "lua" }, "cwd" }
 -- -----------------------------------------------------------------------------
 -- Folding
 -- -----------------------------------------------------------------------------
+-- LazyVim-style folding (nvim-ufo): fold "moderno" con provider LSP/TS.
+vim.opt.foldcolumn = "1"
 vim.opt.foldlevel = 99
-vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-vim.opt.foldmethod = "expr"
+vim.opt.foldlevelstart = 99
+vim.opt.foldenable = true
+vim.opt.foldmethod = "manual"
 
 -- -----------------------------------------------------------------------------
 -- Conceal

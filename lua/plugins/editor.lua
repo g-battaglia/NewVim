@@ -38,6 +38,46 @@ return {
   },
 
   -- ---------------------------------------------------------------------------
+  -- Folding (LazyVim-style)
+  -- ---------------------------------------------------------------------------
+  {
+    "kevinhwang91/nvim-ufo",
+    dependencies = {
+      "kevinhwang91/promise-async",
+    },
+    event = "BufReadPost",
+    opts = {
+      provider_selector = function(_, filetype, buftype)
+        -- nvim-ufo supporta solo { main, fallback }.
+        -- Disabilita ufo su buffer "speciali".
+        if buftype ~= "" and buftype ~= "acwrite" then
+          return ""
+        end
+
+        -- Vue/JS: Tree-sitter tende a dare fold migliori.
+        if filetype == "vue"
+          or filetype == "javascript"
+          or filetype == "javascriptreact"
+          or filetype == "typescript"
+          or filetype == "typescriptreact"
+        then
+          return { "treesitter", "indent" }
+        end
+
+        -- Default robusto: LSP come main, indent come fallback.
+        -- (evita errori quando treesitter non ha query 'folds')
+        return { "lsp", "indent" }
+      end,
+    },
+    keys = {
+      { "zR", function() require("ufo").openAllFolds() end, desc = "Open all folds" },
+      { "zM", function() require("ufo").closeAllFolds() end, desc = "Close all folds" },
+      { "zr", function() require("ufo").openFoldsExceptKinds() end, desc = "Open folds" },
+      { "zm", function() require("ufo").closeFoldsWith() end, desc = "Close folds" },
+    },
+  },
+
+  -- ---------------------------------------------------------------------------
   -- Sessioni
   -- ---------------------------------------------------------------------------
   {
