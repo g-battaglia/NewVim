@@ -53,7 +53,8 @@ vim.g.root_spec = { "lsp", { "package.json", ".git", "lua" }, "cwd" }
 -- Folding
 -- -----------------------------------------------------------------------------
 -- LazyVim-style folding (nvim-ufo): fold "moderno" con provider LSP/TS.
-vim.opt.foldcolumn = "1"
+-- Se non vuoi la colonna fold a sinistra, tienila a 0.
+vim.opt.foldcolumn = "0"
 vim.opt.foldlevel = 99
 vim.opt.foldlevelstart = 99
 vim.opt.foldenable = true
