@@ -14,9 +14,16 @@
 local Util = require("util")
 
 -- Helper: crea callback che chiama una funzione fzf-lua con opts
+-- Nota: fzf-lua vuole `opts.cwd` come stringa, non come funzione.
 local function fzf(action, opts)
   return function()
-    require("fzf-lua")[action](opts or {})
+    local o = opts and vim.deepcopy(opts) or {}
+
+    if type(o.cwd) == "function" then
+      o.cwd = o.cwd()
+    end
+
+    require("fzf-lua")[action](o)
   end
 end
 
