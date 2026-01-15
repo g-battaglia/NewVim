@@ -1,6 +1,7 @@
 local Util = require("util")
 
 -- Check if we need to reload the file when it changed
+-- This handles cases where a file is modified outside of Neovim
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   group = vim.api.nvim_create_augroup("checktime", { clear = true }),
   callback = function()
@@ -11,6 +12,7 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
 })
 
 -- Highlight on yank
+-- Briefly highlights the copied text to give visual feedback
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("highlight_yank", { clear = true }),
   callback = function()
@@ -19,6 +21,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- Resize splits if window got resized
+-- Keeps split proportions equal when the terminal window size changes
 vim.api.nvim_create_autocmd({ "VimResized" }, {
   group = vim.api.nvim_create_augroup("resize_splits", { clear = true }),
   callback = function()
@@ -28,7 +31,8 @@ vim.api.nvim_create_autocmd({ "VimResized" }, {
   end,
 })
 
--- close some filetypes with <q>
+-- Close some filetypes with <q>
+-- Makes it easier to close temporary windows like help, man pages, and test outputs
 vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("close_with_q", { clear = true }),
   pattern = {
@@ -52,7 +56,8 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- wrap and check for spell in text filetypes
+-- Wrap and check for spell in text filetypes
+-- Automatically enables word wrap and spell check for writing (markdown, git commits)
 vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("wrap_spell", { clear = true }),
   pattern = { "gitcommit", "markdown" },
@@ -63,6 +68,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- Fix conceallevel for json files
+-- Ensures JSON quotes are visible (conceal 0) for better editing experience
 vim.api.nvim_create_autocmd({ "FileType" }, {
   group = vim.api.nvim_create_augroup("json_conceal", { clear = true }),
   pattern = { "json", "jsonc", "json5" },
@@ -71,7 +77,8 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
   end,
 })
 
--- Auto create dir when saving a file, in case some intermediate directory does not exist
+-- Auto create dir when saving a file
+-- If you save to a path like `foo/bar/baz.lua` and `foo/bar` doesn't exist, this creates it
 vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   group = vim.api.nvim_create_augroup("auto_create_dir", { clear = true }),
   callback = function(event)

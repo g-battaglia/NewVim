@@ -1,7 +1,10 @@
 return {
   "ahmedkhalf/project.nvim",
   event = "VeryLazy",
-  config = true,
+  -- explicitly define config to require the correct module name 'project_nvim'
+  config = function(_, opts)
+    require("project_nvim").setup(opts)
+  end,
   opts = {
     -- Manual mode doesn't automatically change your root directory, so you have
     -- the option to manually do so using `:ProjectRoot` command.

@@ -2,8 +2,9 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
+    event = { "BufReadPost", "BufNewFile" },
+    cmd = { "TSUpdate", "TSInstall" },
     opts = {
-      -- nvim-ts-rainbow2 configuration
       ensure_installed = {
         "bash",
         "vimdoc",
@@ -31,11 +32,20 @@ return {
         "vue",
       },
       highlight = {
-        enable = true, -- false will disable the whole extension
+        enable = true,
+      },
+      indent = {
+        enable = true,
       },
     },
     config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
+      -- Ensure the module is available before setup
+      local ok, configs = pcall(require, "nvim-treesitter.configs")
+      if not ok then
+        vim.notify("nvim-treesitter.configs not found. Plugin might be installing.", vim.log.levels.WARN)
+        return
+      end
+      configs.setup(opts)
     end,
   },
 }
