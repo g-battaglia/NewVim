@@ -246,15 +246,15 @@ map("x", "<leader>d", [["_d]], { silent = true, desc = "Cut (no yank)" })
 -- Save
 map({ "n", "x" }, "<leader>fs", "<cmd>w<cr><esc>", { desc = "Save file" })
 
--- Git modified files
-map("n", "<leader>gf", function()
+-- Trova i file modificati (Git)
+vim.keymap.set("n", "<leader>gf", function()
 	local ok, fzf = pcall(require, "fzf-lua")
 	if not ok then
 		vim.notify("fzf-lua non disponibile", vim.log.levels.ERROR)
 		return
 	end
 	fzf.git_status()
-end, { desc = "Git status (fzf-lua)" })
+end, { desc = "Trova file Git modificati" })
 
 -- Tabs
 map("n", "<leader><tab>h", "<cmd>tabnext<cr>", { desc = "Next Tab" })

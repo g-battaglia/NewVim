@@ -24,7 +24,7 @@ return {
       { "<leader>gD", "<cmd>DiffviewClose<CR>", desc = "Diffview • chiudi" },
       { "<leader>gh", "<cmd>DiffviewFileHistory %<CR>", desc = "Diffview • history file corrente" },
       { "<leader>gH", "<cmd>DiffviewFileHistory<CR>", desc = "Diffview • history repo" },
-      { "<leader>gf", "<cmd>DiffviewFocusFiles<CR>", desc = "Diffview • focus files panel" },
+      -- { "<leader>gf", "<cmd>DiffviewFocusFiles<CR>", desc = "Diffview • focus files panel" },
       { "<leader>gt", "<cmd>DiffviewToggleFiles<CR>", desc = "Diffview • toggle files panel" },
       { "<leader>gr", "<cmd>DiffviewRefresh<CR>", desc = "Diffview • refresh" },
       {
