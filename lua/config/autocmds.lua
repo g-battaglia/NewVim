@@ -105,3 +105,17 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,
 })
+
+
+-- -----------------------------------------------------------------------------
+-- 7) Per i file markdown non vogliamo i numeri e vogliamo andare a capo
+-- -----------------------------------------------------------------------------
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "markdown" },
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+    vim.opt_local.number = false
+    vim.opt_local.relativenumber = false
+  end,
+})
