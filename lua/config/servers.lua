@@ -128,6 +128,33 @@ return {
   },
 
   -- ---------------------------------------------------------------------------
+  -- Python: pyright
+  -- ---------------------------------------------------------------------------
+  pyright = {
+    root_dir = util.root_pattern(
+      "pyrightconfig.json",
+      "pyproject.toml",
+      "setup.py",
+      "setup.cfg",
+      "requirements.txt",
+      ".git"
+    ),
+    settings = {
+      pyright = {
+        disableOrganizeImports = true, -- usa isort
+      },
+      python = {
+        analysis = {
+          -- Pyright leggerà le config da pyrightconfig.json o pyproject.toml
+          autoSearchPaths = true,
+          useLibraryCodeForTypes = true,
+          diagnosticMode = "openFilesOnly",
+        },
+      },
+    },
+  },
+
+  -- ---------------------------------------------------------------------------
   -- Python: pylsp
   -- ---------------------------------------------------------------------------
   pylsp = {
