@@ -25,7 +25,7 @@ return {
     detection_methods = { "pattern" },
 
     -- File/dir che identificano la root.
-    patterns = { "package.json", ".git", ".gitignore" },
+    patterns = { "pyproject.toml", "package.json", ".git", ".gitignore" },
 
     ignore_lsp = {},
     exclude_dirs = {},
