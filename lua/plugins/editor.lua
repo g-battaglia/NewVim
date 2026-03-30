@@ -106,7 +106,18 @@ return {
     "folke/todo-comments.nvim",
     cmd = { "TodoTrouble", "TodoTelescope" },
     event = { "BufReadPost", "BufNewFile" },
-    opts = {},
+    opts = {
+      signs = true,
+      keywords = {
+        FIX = { icon = "F ", color = "error", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
+        TODO = { icon = "T ", color = "info" },
+        HACK = { icon = "H ", color = "warning" },
+        WARN = { icon = "W ", color = "warning", alt = { "WARNING", "XXX" } },
+        PERF = { icon = "P ", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
+        NOTE = { icon = "N ", color = "hint", alt = { "INFO" } },
+        TEST = { icon = "t ", color = "test", alt = { "TESTING", "PASSED", "FAILED" } },
+      },
+    },
 
     keys = {
       { "]t", function() require("todo-comments").jump_next() end, desc = "Next Todo" },

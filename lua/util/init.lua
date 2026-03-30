@@ -142,11 +142,11 @@ M.icons = {
     removed = "- ",
   },
   dap = {
-    Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
-    Breakpoint = " ",
-    BreakpointCondition = " ",
-    BreakpointRejected = { " ", "DiagnosticError" },
-    LogPoint = ".>",
+    Stopped = { "> ", "DiagnosticWarn", "DapStoppedLine" },
+    Breakpoint = "B ",
+    BreakpointCondition = "C ",
+    BreakpointRejected = { "! ", "DiagnosticError" },
+    LogPoint = "L>",
   },
   kinds = {
     Array = " ",
