@@ -362,6 +362,8 @@ end, { silent = true, desc = "Git Blame Popup" })
 
 map("n", "<leader>gn", "<cmd>lua require('gitsigns').next_hunk()<cr>", { silent = true, desc = "Next Git Hunk" })
 map("n", "<leader>gp", "<cmd>lua require('gitsigns').prev_hunk()<cr>", { silent = true, desc = "Prev Git Hunk" })
+map("n", "]h", "<cmd>lua require('gitsigns').next_hunk()<cr>", { silent = true, desc = "Next Git Hunk" })
+map("n", "[h", "<cmd>lua require('gitsigns').prev_hunk()<cr>", { silent = true, desc = "Prev Git Hunk" })
 
 -- Terminal (override personale)
 map("n", "<leader>tT", function()
