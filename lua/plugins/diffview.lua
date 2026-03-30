@@ -64,6 +64,15 @@ return {
       },
       win_config = { position = "bottom", height = 16 },
     },
+    keymaps = {
+      view = {
+        -- Navigazione rapidissima tra i chunk modificati (perfetta per tastiere IT)
+        { "n", "J", "]c", { desc = "Vai al chunk successivo (Rapido)" } },
+        { "n", "K", "[c", { desc = "Vai al chunk precedente (Rapido)" } },
+        { "n", "<leader>j", "]c", { desc = "Vai al chunk successivo" } },
+        { "n", "<leader>k", "[c", { desc = "Vai al chunk precedente" } },
+      },
+    },
     hooks = {
       diff_buf_read = function(bufnr)
         vim.opt_local.wrap = false
