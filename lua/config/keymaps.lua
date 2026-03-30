@@ -352,6 +352,22 @@ end, { silent = true, desc = "Prettier Fragment" })
 map("n", "<leader>td", "<cmd>cd %:p:h<cr>:pwd<cr>", { desc = "cd to current file" })
 
 -- Gitsigns: hunk next/prev
+map("n", "<leader>gg", function()
+	Snacks.lazygit()
+end, { desc = "Lazygit (Miglior UI Git)" })
+
+map("n", "<leader>gl", function()
+	Snacks.lazygit.log()
+end, { desc = "Lazygit Log (Esplora Commit)" })
+
+map("n", "<leader>gP", function()
+	require("gitsigns").preview_hunk_inline()
+end, { silent = true, desc = "Preview Hunk Inline (Figo)" })
+
+map("n", "<leader>gb", function()
+	require("gitsigns").blame_line({ full = true })
+end, { silent = true, desc = "Git Blame Popup" })
+
 map("n", "<leader>gn", "<cmd>lua require('gitsigns').next_hunk()<cr>", { silent = true, desc = "Next Git Hunk" })
 map("n", "<leader>gp", "<cmd>lua require('gitsigns').prev_hunk()<cr>", { silent = true, desc = "Prev Git Hunk" })
 

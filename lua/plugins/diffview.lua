@@ -37,7 +37,7 @@ return {
     }
   end,
   opts = {
-    enhanced_diff_hl = true,
+    enhanced_diff_hl = true, -- Highlight migliorato
     use_icons = true,
     view = {
       default = { winbar_info = true },
