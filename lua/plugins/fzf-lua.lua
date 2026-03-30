@@ -81,7 +81,21 @@ return {
     -- -------------------------------------------------------------------------
     -- Git
     -- -------------------------------------------------------------------------
-    { "<leader>gc", fzf("git_commits"), desc = "Commits" },
+    { 
+      "<leader>gc", 
+      fzf("git_commits", {
+        actions = {
+          ["default"] = function(selected, opts)
+            if not selected or #selected == 0 then return end
+            -- Estrae l'hash del commit (la prima "parola")
+            local commit_hash = selected[1]:match("[^ ]+")
+            -- Usa DiffviewOpen con commit^! per mostrare solo il diff di QUEL commit
+            vim.cmd("DiffviewOpen " .. commit_hash .. "^!")
+          end
+        }
+      }), 
+      desc = "Esplora Diff Commit" 
+    },
     { "<leader>gs", fzf("git_status"), desc = "Status" },
 
     -- -------------------------------------------------------------------------
