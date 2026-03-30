@@ -20,10 +20,10 @@ return {
     opts = {
       default_component_configs = {
         icon = {
-          folder_closed = "D",
-          folder_open = "O",
-          folder_empty = "E",
-          default = "*",
+          folder_closed = "",
+          folder_open = "",
+          folder_empty = "",
+          default = "",
         },
         modified = {
           symbol = "[+]",
