@@ -137,9 +137,9 @@ M.icons = {
     Info = "I ",
   },
   git = {
-    added = " ",
-    modified = " ",
-    removed = " ",
+    added = "+ ",
+    modified = "~ ",
+    removed = "- ",
   },
   dap = {
     Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
