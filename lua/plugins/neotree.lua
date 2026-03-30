@@ -18,6 +18,33 @@ return {
     },
 
     opts = {
+      default_component_configs = {
+        icon = {
+          folder_closed = "D",
+          folder_open = "O",
+          folder_empty = "E",
+          default = "*",
+        },
+        modified = {
+          symbol = "[+]",
+        },
+        name = {
+          use_git_status_colors = true,
+        },
+        git_status = {
+          symbols = {
+            added = "+",
+            modified = "~",
+            deleted = "-",
+            renamed = "R",
+            untracked = "?",
+            ignored = "I",
+            unstaged = "U",
+            staged = "S",
+            conflict = "C",
+          },
+        },
+      },
       filesystem = {
         follow_current_file = { enabled = true },
         filtered_items = {

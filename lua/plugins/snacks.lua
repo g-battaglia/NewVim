@@ -26,38 +26,18 @@ return {
         ---@type snacks.dashboard.Item[]
         keys = {
           -- Root-aware (come LazyVim)
-          {
-            icon = " ",
-            key = "f",
-            desc = "Find File (Root)",
-            action = ":lua Snacks.dashboard.pick('files', { cwd = require('util').get_root() })",
-          },
-          {
-            icon = " ",
-            key = "g",
-            desc = "Find Text (Root)",
-            action = ":lua Snacks.dashboard.pick('live_grep', { cwd = require('util').get_root() })",
-          },
-          {
-            icon = " ",
-            key = "r",
-            desc = "Recent Files (Root)",
-            action = ":lua Snacks.dashboard.pick('oldfiles', { cwd = require('util').get_root() })",
-          },
+          { icon = "F ", key = "f", desc = "Find File (Root)", action = ":lua Snacks.dashboard.pick('files', { cwd = require('util').get_root() })" },
+          { icon = "S ", key = "g", desc = "Find Text (Root)", action = ":lua Snacks.dashboard.pick('live_grep', { cwd = require('util').get_root() })" },
+          { icon = "R ", key = "r", desc = "Recent Files (Root)", action = ":lua Snacks.dashboard.pick('oldfiles', { cwd = require('util').get_root() })" },
 
           -- Non-root-aware per definizione
-          { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
-          {
-            icon = " ",
-            key = "c",
-            desc = "Config",
-            action = ":lua Snacks.dashboard.pick('files', { cwd = vim.fn.stdpath('config') })",
-          },
+          { icon = "N ", key = "n", desc = "New File", action = ":ene | startinsert" },
+          { icon = "C ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', { cwd = vim.fn.stdpath('config') })" },
 
           -- Session / lifecycle
-          { icon = " ", key = "s", desc = "Restore Session", section = "session" },
-          { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
-          { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+          { icon = "S ", key = "s", desc = "Restore Session", section = "session" },
+          { icon = "L ", key = "l", desc = "Lazy", action = ":Lazy" },
+          { icon = "Q ", key = "q", desc = "Quit", action = ":qa" },
         },
       },
     },
