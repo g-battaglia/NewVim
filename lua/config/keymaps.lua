@@ -352,14 +352,6 @@ end, { silent = true, desc = "Prettier Fragment" })
 map("n", "<leader>td", "<cmd>cd %:p:h<cr>:pwd<cr>", { desc = "cd to current file" })
 
 -- Gitsigns: hunk next/prev
-map("n", "<leader>gg", function()
-	Snacks.lazygit()
-end, { desc = "Lazygit (Miglior UI Git)" })
-
-map("n", "<leader>gl", function()
-	Snacks.lazygit.log()
-end, { desc = "Lazygit Log (Esplora Commit)" })
-
 map("n", "<leader>gP", function()
 	require("gitsigns").preview_hunk_inline()
 end, { silent = true, desc = "Preview Hunk Inline (Figo)" })

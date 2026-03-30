@@ -87,14 +87,30 @@ return {
         actions = {
           ["default"] = function(selected, opts)
             if not selected or #selected == 0 then return end
-            -- Estrae l'hash del commit (la prima "parola")
             local commit_hash = selected[1]:match("[^ ]+")
-            -- Usa DiffviewOpen con commit^! per mostrare solo il diff di QUEL commit
             vim.cmd("DiffviewOpen " .. commit_hash .. "^!")
           end
         }
       }), 
-      desc = "Esplora Diff Commit" 
+      desc = "Esplora Diff Commit (Tutto il repo)" 
+    },
+    { 
+      "<leader>gh", 
+      fzf("git_bcommits", {
+        actions = {
+          ["default"] = function(selected, opts)
+            if not selected or #selected == 0 then return end
+            local commit_hash = selected[1]:match("[^ ]+")
+            local current_file = vim.fn.expand("%")
+            if current_file ~= "" then
+              vim.cmd("DiffviewOpen " .. commit_hash .. "^! -- " .. vim.fn.fnameescape(current_file))
+            else
+              vim.cmd("DiffviewOpen " .. commit_hash .. "^!")
+            end
+          end
+        }
+      }), 
+      desc = "History File Corrente (Fzf + Diffview)" 
     },
     { "<leader>gs", fzf("git_status"), desc = "Status" },
 
