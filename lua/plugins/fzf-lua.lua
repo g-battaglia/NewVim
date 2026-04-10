@@ -137,6 +137,35 @@ return {
     { "<leader>uC", fzf("colorschemes"), desc = "Colorscheme (Preview)" },
   },
 
+  config = function(_, opts)
+    local fzf = require("fzf-lua")
+    local actions = require("fzf-lua.actions")
+    local path_mod = require("fzf-lua.path")
+
+    -- Workaround: su Neovim 0.12 il cursore viene resettato dopo l'azione
+    -- di default. Ri-posizioniamo via vim.schedule per essere sicuri.
+    local orig = actions.file_edit_or_qf
+    local function grep_edit(selected, o)
+      orig(selected, o)
+      if selected and #selected == 1 then
+        vim.schedule(function()
+          local entry = path_mod.entry_to_file(selected[1], o)
+          if entry and entry.line > 0 then
+            pcall(vim.api.nvim_win_set_cursor, 0,
+              { entry.line, math.max(0, entry.col - 1) })
+            vim.cmd("norm! zvzz")
+          end
+        end)
+      end
+    end
+
+    opts.grep = vim.tbl_deep_extend("force", opts.grep or {}, {
+      actions = { ["default"] = grep_edit },
+    })
+
+    fzf.setup(opts)
+  end,
+
   opts = {
     winopts = {
       height = 0.85,
