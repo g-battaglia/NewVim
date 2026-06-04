@@ -95,12 +95,27 @@ return {
       },
 
       routes = {
-        -- Nasconde lo spam di installazione parser Tree-sitter
-        -- (es. "[nvim-treesitter/install/bash]: Compiling parser")
+        -- =================================================================
+        -- Errori → area messaggi classica in basso (NON popup Noice)
+        -- =================================================================
         {
           filter = {
-            event = "msg_show",
-            find = "%[nvim%-treesitter/install/",
+            event = “msg_show”,
+            any = {
+              { kind = “emsg” },      -- error message (vim.error)
+              { kind = “lua_error” },  -- error Lua
+              { kind = “wmsg” },       -- warning
+            },
+          },
+          view = “mini”,
+        },
+
+        -- Nasconde lo spam di installazione parser Tree-sitter
+        -- (es. “[nvim-treesitter/install/bash]: Compiling parser”)
+        {
+          filter = {
+            event = “msg_show”,
+            find = “%[nvim%-treesitter/install/”,
           },
           opts = { skip = true },
         },
@@ -108,14 +123,14 @@ return {
         -- Nasconde messaggi “di servizio” molto frequenti
         {
           filter = {
-            event = "msg_show",
+            event = “msg_show”,
             any = {
-              { find = "%d+L, %d+B" },
-              { find = "; after #%d+" },
-              { find = "; before #%d+" },
+              { find = “%d+L, %d+B” },
+              { find = “; after #%d+” },
+              { find = “; before #%d+” },
             },
           },
-          view = "mini",
+          view = “mini”,
         },
       },
 
