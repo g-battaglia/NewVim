@@ -16,6 +16,13 @@ return {
 
   config = function(_, opts)
     require("project_nvim").setup(opts)
+
+    -- Fix E944: glob() interpreta [] come character class nei path.
+    -- Usiamo fs_stat che non fa glob expansion.
+    local path = require("project_nvim.utils.path")
+    path.exists = function(p)
+      return vim.uv.fs_stat(p) ~= nil
+    end
   end,
 
   opts = {

@@ -114,11 +114,12 @@ do
       signs = {
         text = {
           [vim.diagnostic.severity.ERROR] = icons.Error,
-          [vim.diagnostic.severity.WARN] = icons.Warn,
+          [vim.diagnostic.severity.WARN] = "",
           [vim.diagnostic.severity.INFO] = icons.Info,
           [vim.diagnostic.severity.HINT] = icons.Hint,
         },
       },
+      underline = true,
     })
   end
 end

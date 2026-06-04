@@ -457,3 +457,8 @@ vim.keymap.set("n", "<leader>tg", function()
 	gitsigns.toggle_linehl()
 	gitsigns.toggle_numhl()
 end, { desc = "Toggle gitsigns highlight" })
+
+vim.keymap.set("n", "<leader>tw", function()
+	local gitsigns = require("gitsigns")
+	gitsigns.toggle_word_diff()
+end, { desc = "Toggle gitsigns word highlight" })
