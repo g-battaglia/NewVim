@@ -31,6 +31,9 @@ return {
       -- Sorgenti completion nei buffer
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
+        per_filetype = {
+          codecompanion = { "codecompanion" },
+        },
       },
 
       -- Behaviour lista completion
