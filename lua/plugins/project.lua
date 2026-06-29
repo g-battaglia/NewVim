@@ -2,8 +2,13 @@
 -- NewVim - plugins/project.lua
 -- =============================================================================
 -- project.nvim:
---   - rilevamento root del progetto (pattern)
---   - utile per tool/picker che dipendono dalla cwd
+--   - tiene traccia della cronologia dei progetti (utile per un picker "progetti")
+--   - NON cambia più la cwd all'apertura dei file (manual_mode = true)
+--
+-- Comportamento cwd:
+--   Aprirlo una cartella con nvim => la root resta SEMPRE quella cartella,
+--   indipendentemente dai repo .git superiori. project.nvim è in modalità
+--   manuale: registra i progetti ma non tocca la working directory.
 --
 -- Nota importante:
 -- Il modulo Lua si chiama `project_nvim` (underscore), non `project.nvim`.
@@ -26,7 +31,10 @@ return {
   end,
 
   opts = {
-    manual_mode = false,
+    -- true = NON cambiare la cwd all'apertura di un file.
+    -- La root resta sempre la cartella da cui hai lanciato nvim,
+    -- anche se c'è un repo .git in una directory superiore.
+    manual_mode = true,
 
     -- Metodo di detection: qui usiamo pattern (più prevedibile).
     detection_methods = { "pattern" },
@@ -38,6 +46,9 @@ return {
     exclude_dirs = {},
 
     show_hidden = false,
+
+    -- In manual_mode queste due opzioni sono ininfluenti: project.nvim
+    -- non chiama chdir in automatico. Le lasciamo per completezza.
     silent_chdir = false,
     scope_chdir = "global",
 

@@ -47,7 +47,10 @@ vim.opt.listchars = { space = "⋅", tab = "→ " }
 -- -----------------------------------------------------------------------------
 -- Root detection
 -- -----------------------------------------------------------------------------
-vim.g.root_spec = { "lsp", { "pyproject.toml", "package.json", ".git", "lua" }, "cwd" }
+-- NON cambiamo automaticamente la cwd all'apertura dei file.
+-- La root resta SEMPRE la cartella da cui hai lanciato nvim.
+-- (vim.g.root_spec è una variabile usata solo da LazyVim, che qui non è in uso:
+-- in questa config è morta e fuorviante, per questo non la impostiamo.)
 
 -- -----------------------------------------------------------------------------
 -- Folding
